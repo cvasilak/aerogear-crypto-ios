@@ -25,11 +25,10 @@ SPEC_BEGIN(AGSigningKeySpec)
         describe(@"AGSigningKey", ^{
             context(@"Signing message", ^{
 
-                NSString const * message = @"My Bonnie lies over the ocean, my Bonnie lies over the sea";
+                NSString * const message = @"My Bonnie lies over the ocean, my Bonnie lies over the sea";
 
                 __block AGSigningKey *signingKey;
                 __block AGVerifyKey *verifyKey;
-
 
                 beforeEach(^{
                     signingKey = [[AGSigningKey alloc] init];
