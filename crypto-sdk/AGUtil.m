@@ -54,11 +54,9 @@
 
 + (BOOL) isValid:(NSUInteger)status msg:(NSString *)message {
     if (status != 0) {
-        NSException* myException = [NSException
-                exceptionWithName:@"RuntimeException"
-                           reason:message
-                         userInfo:nil];
-        @throw myException;
+        @throw [NSException exceptionWithName:NSInternalInconsistencyException
+                                       reason:message
+                                     userInfo:nil];
     }
     return YES;
 }
@@ -69,7 +67,7 @@
 
 + (void) checkLength:(NSData *) data size:(NSUInteger)size {
     if (data == nil || [data length] != size) {
-        [NSException raise:@"RuntimeException"
+        [NSException raise:NSInternalInconsistencyException
                     format:@"Invalid size %ul", [data length]];
     }
 }
