@@ -18,49 +18,48 @@
 #import "AGSigningKey.h"
 #import "AGUtil.h"
 
-@implementation AGSigningKey
+@implementation AGSigningKey {
+    NSMutableData *_secretKey;
+    NSMutableData *_publicKey;
+}
 
 - (id)init {
     self = [super init];
-
+    
     if (self) {
+        NSMutableData *seed = [NSMutableData dataWithLength:crypto_sign_ed25519_SECRETKEYBYTES];
+        randombytes([seed mutableBytes], [seed length]);
 
-        const unsigned long long bufferLen = crypto_sign_ed25519_SECRETKEYBYTES;
-        unsigned char seed[bufferLen];
-
-        randombytes(seed, bufferLen);
-        
-        unsigned char cpublicKey[crypto_sign_ed25519_PUBLICKEYBYTES];
-        unsigned char csecretKey[crypto_sign_ed25519_SECRETKEYBYTES];
+        _publicKey = [NSMutableData dataWithLength:crypto_sign_ed25519_PUBLICKEYBYTES];
+        _secretKey = [NSMutableData dataWithLength:crypto_sign_ed25519_SECRETKEYBYTES];
 
         // Generate the keypair
-        crypto_sign_ed25519_seed_keypair(cpublicKey, csecretKey, seed);
+        int status = crypto_sign_ed25519_seed_keypair([_publicKey mutableBytes],
+                                         [_secretKey mutableBytes],
+                                         [seed mutableBytes]);
         
-        _publicKey = [NSData dataWithBytes:cpublicKey length:crypto_sign_ed25519_PUBLICKEYBYTES];
-        _secretKey = [NSData dataWithBytes:csecretKey length:crypto_sign_ed25519_SECRETKEYBYTES];
-
-        // Validate the keypair
-        [AGUtil isValid:crypto_sign_ed25519_seed_keypair(cpublicKey, csecretKey, seed)
-                    msg:@"Failed to generate a key pair"];
+        // should not happen
+        NSAssert(status == 0, @"Failed to generate a key pair", status);
     }
-
+    
     return self;
 }
 
 - (NSData *)sign:(NSString *)message {
+    NSParameterAssert(message != nil);
+    
     unsigned long long bufferLen;
     const unsigned char *msg = (const unsigned char *)[message UTF8String];
-    
     unsigned long long mlen = strlen((const char*) msg);
+    
     NSData *signature = [AGUtil prependZeros:crypto_sign_ed25519_BYTES msg:message];
     unsigned char *bytePtr = (unsigned char *)[signature bytes];
+    
+    // sign the message
+    int status = crypto_sign_ed25519(bytePtr, &bufferLen, msg,
+                                     mlen, (unsigned char *)[_secretKey bytes]);
 
-    if( crypto_sign_ed25519(bytePtr, &bufferLen, msg,
-            mlen, (unsigned char *)[_secretKey bytes]) != 0 ) {
-        @throw [NSException exceptionWithName:NSInternalInconsistencyException
-                                       reason:@"unable to sign message"
-                                     userInfo:nil];
-    }
+    NSAssert(status == 0, @"unable to sign message", status);
 
     return [AGUtil slice:signature start:0 end:crypto_sign_ed25519_BYTES];
 }

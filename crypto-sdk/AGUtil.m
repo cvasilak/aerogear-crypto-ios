@@ -18,38 +18,18 @@
 #import "AGUtil.h"
 
 
-@implementation AGUtil {
-
-}
+@implementation AGUtil
 
 + (NSData *)prependZeros:(NSUInteger)n msg:(NSString *)message {
-    // allocate n+message.length buffer
-    uint8_t * result = malloc( (n + message.length) * sizeof(uint8_t) );
-
-    // 'zero' the contents
-    memset((void *)result, 0x0, n + message.length);
-
-    // extract c string
-    const char *source = [message UTF8String];
-
-    // copy from 'source' to 'result' starting from (result+n) pos
-    memcpy(result+n, source, message.length);
-
-    NSData *data = [NSData dataWithBytes:result length:n + message.length ];
-
+    NSMutableData *data = [NSMutableData dataWithLength:n+message.length];
+    
+    [data replaceBytesInRange:NSMakeRange(n, message.length) withBytes:[message UTF8String]];
+    
     return data;
 }
 
-+ (NSMutableData *)prependZeros:(NSUInteger)n{
-    // allocate n+message.length buffer
-    uint8_t * result = malloc( n * sizeof(uint8_t) );
-
-    // 'zero' the contents
-    memset((void *)result, 0x0, n);
-
-    NSMutableData *data = [NSMutableData dataWithBytes:result length:n];
-
-    return data;
++ (NSData *)prependZeros:(NSUInteger)n {
+    return [NSMutableData dataWithLength:n];
 }
 
 + (BOOL) isValid:(NSUInteger)status msg:(NSString *)message {
