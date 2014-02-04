@@ -11,7 +11,7 @@ We understand that applying good cryptographic techniques is not an easy task an
 
 The project shares the same vision with our sibling AeroGear project [AeroGear-Crypto-Java](https://github.com/aerogear/aerogear-crypto-java). If you are a Java developer, we strongly recommend to look at the project. 
 
-The project is also the base of providing cryptographic services to [AeroGear-IOS](http://www.aerogear.org) library project.
+The project is also the base for providing cryptographic services to [AeroGear-IOS](http://www.aerogear.org) library project.
 
 ## Requirements
 
